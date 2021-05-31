@@ -1,12 +1,10 @@
 // ==UserScript==
 // @name                Simplified Chinese for light.gg
-// @name:en             Simplified Chinese for light.gg
 // @name:zh             light.gg 简体中文支持
 // @name:zh-CN          light.gg 简体中文支持
 // @namespace           https://github.com/HZDeluxe
 // @version             0.1
 // @description         Add Simplified Chinese weapons and perks display for light.gg
-// @description:en      Add Simplified Chinese weapons and perks display for light.gg
 // @description:zh      为light.gg添加简体中文武器和特性支持
 // @description:zh-CN   为light.gg添加简体中文武器和特性支持
 // @author              HZDeluxe
