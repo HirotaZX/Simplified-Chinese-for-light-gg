@@ -100,4 +100,79 @@
         return realOpen.apply(this, arguments);
     };
 
+    // 汉化界面
+    var dict = {
+        common: {
+            "Splicer": "永夜",
+            "Chosen": "天选",
+            "Beyond Light": "凌光之刻",
+            "Trials": "试炼",
+            "Raids": "突袭",
+            "Lore": "传奇故事",
+            "Exotic Gear": "异域装备",
+            "Gambit": "智谋",
+            "Vanguard": "先锋",
+            "Crucible": "熔炉",
+            "The Crucible": "熔炉",
+            "Iron Banner": "铁旗",
+            "Emblems": "徽标",
+            "Checklists": "清单",
+            "Eververse": "永恒之诗",
+            "Season 14": "14赛季",
+            "Override Gear": "超控装备",
+            "Vault of Glass Gear": "玻璃宝库装备",
+            "New Exotics": "新增异域装备",
+            "New Armor": "新增护甲",
+            "New Weapons": "新增武器",
+            "New Cosmetics": "新增装饰",
+            "New Quests": "新增任务",
+            "Trials Gear": "试炼装备",
+            "All Seasons": "所有赛季",
+            "Exotics": "异域装备",
+            "Weapons": "武器",
+            "All Armor": "所有护甲",
+            "Titan Gear": "泰坦装备",
+            "Hunter Gear": "猎人装备",
+            "Warlock Gear": "术士装备",
+            "Cosmetics": "装饰",
+            "Inventory Items": "物品栏",
+            "Quests": "任务",
+            "Bounties": "悬赏",
+            "Legend": "传说",
+            "Collections": "收藏品",
+            "Triumphs": "成就",
+            "Badges": "证章",
+            "Seals": "印章",
+            "Vendors": "商人",
+            "God Roll Hub": "God Roll 中心",
+            "God Roll Finder": "God Roll 查找",
+            "Roll Appraiser": "Roll 评估",
+            "Tooltip Builder": "Tooltip 构建",
+            "Season Pass Tracker": "季票进度追踪",
+            "The Director": "导航器",
+            "API Update Tracker": "API 更新追踪",
+            "Item Comparer": "装备对比"
+        },
+        navbar: {
+            "Database": "数据库",
+            "God Rolls": "God Rolls",
+            "Tools": "工具",
+            "Collection": "收藏",
+            "Leaderboard": "排行榜",
+        }
+    };
+    var navbar = document.querySelector('#navbar-collapse');
+    var navbarWalker = document.createTreeWalker(
+        navbar,
+        NodeFilter.SHOW_TEXT
+    );
+    var currentNode = navbarWalker.currentNode;
+    while(currentNode) {
+        var text = currentNode.textContent.trim();
+        text = dict.navbar[text] || dict.common[text];
+        if(text) {
+           currentNode.textContent = text; 
+        }
+        currentNode = navbarWalker.nextNode();
+    }
 })();
