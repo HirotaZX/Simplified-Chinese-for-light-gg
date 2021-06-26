@@ -20,6 +20,15 @@
             item: { ready: false }
         },
         pages: {
+            index: {
+                path: /^\/$/i,
+                elms: {
+                    navbar: { 
+                        selector: '#navbar-collapse', 
+                        ontranslate: translNavbar 
+                    }
+                }
+            },
             item: {
                 path: /\/items\/(\d+)\//i,
                 elms: {
@@ -46,6 +55,15 @@
                         pretranslate: modifyPerksRequest,
                         ontranslate: translItemPerks
                     },
+                    itemYourRollsTitle: {
+                        selector: '#my-rolls > h4',
+                        ontranslate: function(elm) {
+                            if(elm.translated) {
+                                elm.translated.childNodes[0].textContent = '你的 Roll';
+                            }
+                            elm.translDone = true;
+                        }
+                    },
                     itemYourRolls: { 
                         selector: '#my-rolls', 
                         dynamic: true, 
@@ -61,6 +79,15 @@
                         selector: '#related-collectible', 
                         pretranslate: getItemData,
                         ontranslate: translRelatedCollectible 
+                    },
+                    itemLoreTitle: {
+                        selector: '#main-column > h3',
+                        ontranslate: function(elm) {
+                            if(elm.translated) {
+                                elm.translated.innerText = '传奇故事';
+                            }
+                            elm.translDone = true;
+                        }
                     },
                     itemLoreContent: { 
                         selector: '#lore-content',
@@ -101,69 +128,146 @@
                 itemsWithDataId.forEach(function(item) {
                     item.setAttribute('data-id', item.dataset.id + '-chs');
                 });
+            },
+            translateTree: function(elm) {
+                if(!elm.translated) {
+                    return;
+                }
+                var treeWalker = document.createTreeWalker(
+                    elm.translated,
+                    NodeFilter.SHOW_TEXT
+                );
+                var currentNode = treeWalker.currentNode;
+                while(currentNode) {
+                    var text = currentNode.textContent.trim();
+                    var translatedText = dict[text];
+                    if(translatedText) {
+                       currentNode.textContent = translatedText; 
+                    }
+                    currentNode = treeWalker.nextNode();
+                }
             }
         }
     };
 
     var dict = {
-        common: {
-            "Splicer": "永夜",
-            "Chosen": "天选",
-            "Beyond Light": "凌光之刻",
-            "Trials": "试炼",
-            "Raids": "突袭",
-            "Lore": "传奇故事",
-            "Exotic Gear": "异域装备",
-            "Gambit": "智谋",
-            "Vanguard": "先锋",
-            "Crucible": "熔炉",
-            "The Crucible": "熔炉",
-            "Iron Banner": "铁旗",
-            "Emblems": "徽标",
-            "Checklists": "清单",
-            "Eververse": "永恒之诗",
-            "Season 14": "14赛季",
-            "Override Gear": "超控装备",
-            "Vault of Glass Gear": "玻璃宝库装备",
-            "New Exotics": "新增异域装备",
-            "New Armor": "新增护甲",
-            "New Weapons": "新增武器",
-            "New Cosmetics": "新增装饰",
-            "New Quests": "新增任务",
-            "Trials Gear": "试炼装备",
-            "All Seasons": "所有赛季",
-            "Exotics": "异域装备",
-            "Weapons": "武器",
-            "All Armor": "所有护甲",
-            "Titan Gear": "泰坦装备",
-            "Hunter Gear": "猎人装备",
-            "Warlock Gear": "术士装备",
-            "Cosmetics": "装饰",
-            "Inventory Items": "物品栏",
-            "Quests": "任务",
-            "Bounties": "悬赏",
-            "Legend": "传说",
-            "Collections": "收藏品",
-            "Triumphs": "成就",
-            "Badges": "证章",
-            "Seals": "印章",
-            "Vendors": "商人",
-            "God Roll Hub": "God Roll 中心",
-            "God Roll Finder": "God Roll 查找",
-            "Roll Appraiser": "Roll 评估",
-            "Tooltip Builder": "Tooltip 构建",
-            "Season Pass Tracker": "季票进度追踪",
-            "The Director": "导航器",
-            "API Update Tracker": "API 更新追踪",
-            "Item Comparer": "装备对比"
-        },
-        navbar: {
-            "Database": "数据库",
-            "God Rolls": "God Rolls",
-            "Tools": "工具",
-            "Collection": "收藏",
-            "Leaderboard": "排行榜",
-        }
+        "Splicer": "永夜",
+        "Chosen": "天选",
+        "Beyond Light": "凌光之刻",
+        "Trials": "试炼",
+        "Raids": "突袭",
+        "Lore": "传奇故事",
+        "Exotic Gear": "异域装备",
+        "Gambit": "智谋",
+        "Vanguard": "先锋",
+        "Crucible": "熔炉",
+        "The Crucible": "熔炉",
+        "Iron Banner": "铁旗",
+        "Emblems": "徽标",
+        "Checklists": "清单",
+        "Eververse": "永恒之诗",
+        "Season 14": "14赛季",
+        "Override Gear": "超控装备",
+        "Vault of Glass Gear": "玻璃宝库装备",
+        "New Exotics": "新增异域装备",
+        "New Armor": "新增护甲",
+        "New Weapons": "新增武器",
+        "New Cosmetics": "新增装饰",
+        "New Quests": "新增任务",
+        "Trials Gear": "试炼装备",
+        "All Seasons": "所有赛季",
+        "Exotics": "异域装备",
+        "Weapons": "武器",
+        "All Armor": "所有护甲",
+        "Titan Gear": "泰坦装备",
+        "Hunter Gear": "猎人装备",
+        "Warlock Gear": "术士装备",
+        "Cosmetics": "装饰",
+        "Inventory Items": "物品栏",
+        "Quests": "任务",
+        "Bounties": "悬赏",
+        "Legend": "传说",
+        "Collections": "收藏品",
+        "Triumphs": "成就",
+        "Badges": "证章",
+        "Seals": "印章",
+        "Vendors": "商人",
+        "God Roll Hub": "God Roll 中心",
+        "God Roll Finder": "God Roll 查找",
+        "Roll Appraiser": "Roll 评估",
+        "Tooltip Builder": "Tooltip 构建",
+        "Season Pass Tracker": "季票进度追踪",
+        "The Director": "导航器",
+        "API Update Tracker": "API 更新追踪",
+        "Item Comparer": "装备对比",
+
+        // navbar
+        "Database": "数据库",
+        "God Rolls": "God Rolls",
+        "Tools": "工具",
+        "Collection": "收藏",
+        "Leaderboard": "排行榜",
+
+        // item page
+        "Weapon Stats": "武器属性",
+        "Hidden Stats": "隐藏属性",
+        "Perks": "特性",
+        "Curated Roll": "官 Roll",
+        "Not all curated rolls actually drop in-game.": "不是所有的官 Roll都能在游戏里掉落。",
+        "Random Rolls": "随机 Roll",
+        "Item is eligible for random rolls.": "该道具掉落时可以获得随机特性。",
+        "Item has recommended perks from the community.": "该道具具有社区推荐的特性。",
+        "Community Average Roll": "社区最常用 Roll",
+        "Related Collectible": "相关收集品",
+        "Contained In": "产出于",
+        "Reward From": "奖励于",
+        "Related Vendors": "相关商人",
+        "Name": "名称",
+        "Class": "职业",
+        "Titan": "泰坦",
+        "Hunter": "猎人",
+        "Warlock": "术士",
+        "Rarity": "稀有度",
+        "Common": "普通",
+        "Uncommon": "罕见",
+        "Rare": "稀有",
+        "Legendary": "传说",
+        "Exotic": "异域",
+        "Slot": "槽位",
+        "Kinetic": "动能",
+        "Energy": "能量",
+        "Power": "威能",
+        "Type": "类别",
+        "Triumph": "成就",
+        "Share": "分享",
+        "Compare": "对比",
+        "View 3D": "查看 3D",
+        "Screenshots": "屏幕截图",
+        "Details": "详情",
+        "Deals": "产生 ",
+        "KINETIC": "动能",
+        "SOLAR": "烈日",
+        "VOID": "虚空",
+        "ARC": "电弧",
+        "STASIS": "冰影",
+        "damage": " 伤害",
+        "Uses": "使用 ",
+        "PRIMARY": "主武器",
+        "SPECIAL": "特殊武器",
+        "HEAVY": "重武器",
+        "ammo": " 弹药",
+        "Introduced in": "加入于",
+        "Kinetic Weapon": "动能武器",
+        "Energy Weapon": "能量武器",
+        "Power Weapon": "威能武器",
+        "Instance Item": "可实例化道具",
+        "Equippable": "可装备",
+        "Community Rarity": "社区稀有度",
+        "Version History": "版本历史",
+        "MODIFIED": "修改于",
+        "ADDED": "添加于",
+        "Tags": "标签",
+        "Other Languages": "其他语言"
     };
 
     init();
@@ -190,7 +294,7 @@
         if(!page) {
             return;
         }
-        
+
         translateElms();
         createToggleButton();
         toggleTranslation(localStorage.getItem('lang') === 'chs');
@@ -206,8 +310,10 @@
                 }
                 if(!elm.dynamic) {
                     var domElm = document.querySelector(sel);
-                    elm.original = domElm.cloneNode(true);
-                    elm.translated = domElm.cloneNode(true);
+                    if(domElm) {
+                        elm.original = domElm.cloneNode(true);
+                        elm.translated = domElm.cloneNode(true);
+                    }
                 }
                 if(elm.ontranslate) {
                     elm.ontranslate(elm);
@@ -224,6 +330,10 @@
         var btnChs = document.createElement('button');
         btnChs.classList.add('btn', 'btn-orange');
         btnChs.style.fontSize = '20px';
+        btnChs.style.position = 'fixed';
+        btnChs.style.right = '20px';
+        btnChs.style.top = '20px';
+        btnChs.style.zIndex = '5000';
         
         function toggleButton(lang) {
             if(lang === 'chs') {
@@ -249,9 +359,7 @@
             toggleButton(lang);
         };
     
-        var h1 = document.createElement('h1');
-        h1.append(btnChs);
-        document.querySelector('header').append(h1);
+        document.body.append(btnChs);
     }
 
     // switch language by replacing html
@@ -268,8 +376,10 @@
             var sel = elm.selector;
             if(sel) {
                 if(!elm.dynamic) {
-                    var domNode = document.querySelector(sel);
-                    domNode.innerHTML = chs ? elm.translated.innerHTML : elm.original.innerHTML;
+                    var domElm = document.querySelector(sel);
+                    if(domElm) {
+                        domElm.innerHTML = chs ? elm.translated.innerHTML : elm.original.innerHTML;
+                    }
                 }
                 if(elm.ontoggle) {
                     elm.ontoggle();
@@ -327,19 +437,7 @@
     /* actual translation functions */
     // translate navbar
     function translNavbar(navbar) {
-        var navbarWalker = document.createTreeWalker(
-            navbar.translated,
-            NodeFilter.SHOW_TEXT
-        );
-        var currentNode = navbarWalker.currentNode;
-        while(currentNode) {
-            var text = currentNode.textContent.trim();
-            text = dict.navbar[text] || dict.common[text];
-            if(text) {
-               currentNode.textContent = text; 
-            }
-            currentNode = navbarWalker.nextNode();
-        }
+        lgg.utils.translateTree(navbar);
         navbar.translDone = true;
     }
     
@@ -375,17 +473,23 @@
 
     // translate item stats
     function translItemStats(is) {
-        // to-do
-
+        lgg.utils.translateTree(is);
         is.translDone = true;
     }
 
     // translate item perks
     function translItemPerks(ip) {
         lgg.utils.addChsSuffix(ip);
+        lgg.utils.translateTree(ip);
 
-        // to-do
-
+        // translate community average roll description
+        var descLink = ip.translated.querySelector('a[data-target="#community-roll-modal"]');
+        if(descLink) {
+            var desc = descLink.parentElement.childNodes[0];
+            var matches = desc.textContent.match(/on (.+) copies/i);
+            desc.textContent = '下面是基于 ' + matches[1] + ' 份该武器统计出的最常装备的特性。';
+        }
+        
         ip.translDone = true;
     }
 
@@ -400,28 +504,39 @@
         }
         rc.translated.querySelector('.item-header .item-name h2').childNodes[0].textContent = item.name;
         rc.translated.querySelector('.source-line').innerText = item.source;
+        lgg.utils.translateTree(rc);
         rc.translDone = true;
     }
 
     // translate lore content
     function translLoreContent(lc) {
-        // to-do
-
+        lgg.utils.translateTree(lc);
         lc.translDone = true;
     }
 
     // translate item sidebar
     function translItemSidebar(is) {
-        // to-do
+        lgg.utils.translateTree(is);
+
+        // translate community rarity description
+        var rarityDesc = is.translated.querySelector('#community-rarity > div > span');
+        var percent = rarityDesc.childNodes[1].innerText;
+        rarityDesc.innerHTML = '被 <strong>' + percent + '</strong> 的light.gg <br> 守护者发现过';
 
         is.translDone = true;
     }
 
     function translTabbedContent(tc) {
         lgg.utils.addChsSuffix(tc);
+        lgg.utils.translateTree(tc);
 
-        // to-do
-
+        // translate reviews (num)
+        var reviewTab = tc.translated.querySelector('#review-tab');
+        if(reviewTab) {
+            var matches = reviewTab.innerText.match(/\(\d+\)/i);
+            reviewTab.innerText = '评价 ' + matches[0];
+        }
+        
         tc.translDone = true;
     }
 })();
