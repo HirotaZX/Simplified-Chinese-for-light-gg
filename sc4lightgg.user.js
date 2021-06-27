@@ -67,12 +67,34 @@
                     itemYourRolls: { 
                         selector: '#my-rolls', 
                         dynamic: true, 
-                        pretranslate: modifyPerksRequest,
-                        ontranslate: function(node) {
-            
-                        }, 
-                        ontoggle: function(chs) {
-            
+                        pretranslate: function(){
+                            modifyPerksRequest();
+
+                            // modify UpdateComputedRolls function
+                            var realRolls = unsafeWindow.vm2.UpdateComputedRolls;
+                            unsafeWindow.vm2.UpdateComputedRolls = function() {
+                                realRolls();
+                                if(localStorage.getItem('lang') === 'chs') {
+                                    // var rolls = unsafeWindow.vm2.ComputedRolls;
+                                    // rolls.forEach(function(roll) {
+                                    //     for (var prop in roll.plugs) {
+                                    //         roll.plugs[prop].forEach(function(perk) {
+                                    //             perk.plugItemHash = perk.plugItemHash + '/?chs';
+                                    //         });
+                                    //     }
+                                    // });
+                                    unsafeWindow.vm2.$nextTick(function(){
+                                        lgg.utils.addChsSuffix(unsafeWindow.vm2.$el);
+                                    });
+                                } else {
+                                    unsafeWindow.vm2.$nextTick(function(){
+                                        lgg.utils.removeChsSuffix(unsafeWindow.vm2.$el);
+                                    });
+                                }
+                            }
+                        },
+                        ontoggle: function() {
+                            document.body.dispatchEvent(new Event("doneRefreshing"));
                         }
                     },
                     itemRelatedCollectible: { 
@@ -124,17 +146,23 @@
                 return true;
             },
             addChsSuffix: function(elm) {
-                var itemsWithDataId = elm.translated.querySelectorAll('.show-hover[data-id]');
+                var itemsWithDataId = elm.querySelectorAll('.show-hover[data-id]');
                 itemsWithDataId.forEach(function(item) {
-                    item.setAttribute('data-id', item.dataset.id + '-chs');
+                    item.setAttribute('data-id', item.dataset.id.replace('-chs', '') + '-chs');
+                });
+            },
+            removeChsSuffix: function(elm) {
+                var itemsWithDataId = elm.querySelectorAll('.show-hover[data-id]');
+                itemsWithDataId.forEach(function(item) {
+                    item.setAttribute('data-id', item.dataset.id.replace('-chs', ''));
                 });
             },
             translateTree: function(elm) {
-                if(!elm.translated) {
+                if(!elm) {
                     return;
                 }
                 var treeWalker = document.createTreeWalker(
-                    elm.translated,
+                    elm,
                     NodeFilter.SHOW_TEXT
                 );
                 var currentNode = treeWalker.currentNode;
@@ -334,7 +362,7 @@
         btnChs.style.right = '20px';
         btnChs.style.top = '20px';
         btnChs.style.zIndex = '5000';
-        
+
         function toggleButton(lang) {
             if(lang === 'chs') {
                 btnChs.innerText = '简';
@@ -345,20 +373,15 @@
             }
         }
 
-        toggleButton(localStorage.getItem('lang'));
         btnChs.onclick = function() {
             var lang = localStorage.getItem('lang');
-            if(lang === 'chs') {
-                toggleTranslation(false);
-                lang = 'others';
-            } else {
-                toggleTranslation(true);
-                lang = 'chs';
-            }
+            lang = lang === 'chs' ? 'others' : 'chs';
             localStorage.setItem('lang', lang);
             toggleButton(lang);
+            toggleTranslation(lang === 'chs');
         };
-    
+
+        toggleButton(localStorage.getItem('lang'));
         document.body.append(btnChs);
     }
 
@@ -382,7 +405,7 @@
                     }
                 }
                 if(elm.ontoggle) {
-                    elm.ontoggle();
+                    elm.ontoggle(elm, chs);
                 }
             }
         }
@@ -437,7 +460,7 @@
     /* actual translation functions */
     // translate navbar
     function translNavbar(navbar) {
-        lgg.utils.translateTree(navbar);
+        lgg.utils.translateTree(navbar.translated);
         navbar.translDone = true;
     }
     
@@ -473,14 +496,14 @@
 
     // translate item stats
     function translItemStats(is) {
-        lgg.utils.translateTree(is);
+        lgg.utils.translateTree(is.translated);
         is.translDone = true;
     }
 
     // translate item perks
     function translItemPerks(ip) {
-        lgg.utils.addChsSuffix(ip);
-        lgg.utils.translateTree(ip);
+        lgg.utils.addChsSuffix(ip.translated);
+        lgg.utils.translateTree(ip.translated);
 
         // translate community average roll description
         var descLink = ip.translated.querySelector('a[data-target="#community-roll-modal"]');
@@ -504,19 +527,19 @@
         }
         rc.translated.querySelector('.item-header .item-name h2').childNodes[0].textContent = item.name;
         rc.translated.querySelector('.source-line').innerText = item.source;
-        lgg.utils.translateTree(rc);
+        lgg.utils.translateTree(rc.translated);
         rc.translDone = true;
     }
 
     // translate lore content
     function translLoreContent(lc) {
-        lgg.utils.translateTree(lc);
+        lgg.utils.translateTree(lc.translated);
         lc.translDone = true;
     }
 
     // translate item sidebar
     function translItemSidebar(is) {
-        lgg.utils.translateTree(is);
+        lgg.utils.translateTree(is.translated);
 
         // translate community rarity description
         var rarityDesc = is.translated.querySelector('#community-rarity > div > span');
@@ -527,8 +550,8 @@
     }
 
     function translTabbedContent(tc) {
-        lgg.utils.addChsSuffix(tc);
-        lgg.utils.translateTree(tc);
+        lgg.utils.addChsSuffix(tc.translated);
+        lgg.utils.translateTree(tc.translated);
 
         // translate reviews (num)
         var reviewTab = tc.translated.querySelector('#review-tab');
