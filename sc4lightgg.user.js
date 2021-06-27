@@ -20,23 +20,20 @@
         data: {
             item: { ready: false }
         },
+        common: {
+            navbar: { 
+                selector: '#navbar-collapse', 
+                ontranslate: translNavbar 
+            }
+        },
         pages: {
             index: {
                 path: /^\/$/i,
-                elms: {
-                    navbar: { 
-                        selector: '#navbar-collapse', 
-                        ontranslate: translNavbar 
-                    }
-                }
+                elms: {}
             },
             item: {
                 path: /\/items\/(\d+)\//i,
                 elms: {
-                    navbar: { 
-                        selector: '#navbar-collapse', 
-                        ontranslate: translNavbar 
-                    },
                     itemHeader: { 
                         selector: '#main-column > .item-header', 
                         ontranslate:  translItemHeader 
@@ -123,13 +120,18 @@
         },
         utils: {
             getCurrentPage: function() {
-                for (var prop in lgg.pages) {
-                    var path = lgg.pages[prop].path;
+                var p = { elms: {} };
+                for (var propPage in lgg.pages) {
+                    var path = lgg.pages[propPage].path;
                     if(path.test(location.pathname)) {
-                        return lgg.pages[prop];
+                        p = lgg.pages[propPage];
+                        break;
                     }
                 }
-                return null;
+                for (var propCommon in lgg.common) {
+                    p.elms[propCommon] = lgg.common[propCommon];
+                }
+                return p;
             },
             getItemId: function() {
                 var matches = location.pathname.match(/\/items\/(\d+)\//i);
