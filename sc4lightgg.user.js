@@ -9,12 +9,13 @@
 // @description:zh-CN   为light.gg添加简体中文武器和特性支持
 // @author              HZDeluxe
 // @match               https://www.light.gg/*
-// @grant               unsafeWindow
 // ==/UserScript==
 
 (function() {
     'use strict';
     var page = null;
+    var getItemDataOnce = wrapOnce(getItemData);
+    var modifyPerksRequestOnce = wrapOnce(modifyPerksRequest);
     var lgg = {
         data: {
             item: { ready: false }
@@ -38,12 +39,12 @@
                     },
                     itemHeader: { 
                         selector: '#main-column > .item-header', 
-                        pretranslate: getItemData,
+                        pretranslate: getItemDataOnce,
                         ontranslate:  translItemHeader 
                     },
                     itemKeyPerks: { 
                         selector: '#special-perks', 
-                        pretranslate: getItemData,
+                        pretranslate: getItemDataOnce,
                         ontranslate: translKeyPerks 
                     },
                     itemStats: { 
@@ -52,7 +53,7 @@
                     },
                     itemPerks: { 
                         selector: '#socket-container > .perks',
-                        pretranslate: modifyPerksRequest,
+                        pretranslate: modifyPerksRequestOnce,
                         ontranslate: translItemPerks
                     },
                     itemYourRollsTitle: {
@@ -67,30 +68,25 @@
                     itemYourRolls: { 
                         selector: '#my-rolls', 
                         dynamic: true, 
-                        pretranslate: function(){
-                            modifyPerksRequest();
-
-                            // modify UpdateComputedRolls function
-                            var realRolls = unsafeWindow.vm2.UpdateComputedRolls;
-                            unsafeWindow.vm2.UpdateComputedRolls = function() {
-                                realRolls();
-                                if(localStorage.getItem('lang') === 'chs') {
-                                    // var rolls = unsafeWindow.vm2.ComputedRolls;
-                                    // rolls.forEach(function(roll) {
-                                    //     for (var prop in roll.plugs) {
-                                    //         roll.plugs[prop].forEach(function(perk) {
-                                    //             perk.plugItemHash = perk.plugItemHash + '/?chs';
-                                    //         });
-                                    //     }
-                                    // });
-                                    unsafeWindow.vm2.$nextTick(function(){
-                                        lgg.utils.addChsSuffix(unsafeWindow.vm2.$el);
-                                    });
-                                } else {
-                                    unsafeWindow.vm2.$nextTick(function(){
-                                        lgg.utils.removeChsSuffix(unsafeWindow.vm2.$el);
-                                    });
-                                }
+                        pretranslate: modifyPerksRequestOnce,
+                        ontranslate: function() {
+                            var myRolls = document.querySelector('#my-rolls');
+                            if(myRolls) {
+                                // get vue instance and modify UpdateComputedRolls function
+                                var vm2 = myRolls.__vue__;
+                                var realUpdateRolls = vm2.UpdateComputedRolls;
+                                vm2.UpdateComputedRolls = function() {
+                                    realUpdateRolls();
+                                    if(localStorage.getItem('lang') === 'chs') {
+                                        vm2.$nextTick(function(){
+                                            lgg.utils.addChsSuffix(vm2.$el);
+                                        });
+                                    } else {
+                                        vm2.$nextTick(function(){
+                                            lgg.utils.removeChsSuffix(vm2.$el);
+                                        });
+                                    }
+                                };
                             }
                         },
                         ontoggle: function() {
@@ -99,7 +95,7 @@
                     },
                     itemRelatedCollectible: { 
                         selector: '#related-collectible', 
-                        pretranslate: getItemData,
+                        pretranslate: getItemDataOnce,
                         ontranslate: translRelatedCollectible 
                     },
                     itemLoreTitle: {
@@ -299,8 +295,7 @@
     };
 
     init();
-    
-    /* function defines */ 
+
     function init() {
         // init language setting
         if (!localStorage.getItem('lang')) {
@@ -328,6 +323,7 @@
         toggleTranslation(localStorage.getItem('lang') === 'chs');
     }
 
+    /* function defines */ 
     // save and translate DOM elements in memory
     function translateElms() {
         function translateSingleElm(elm) {
@@ -414,10 +410,20 @@
         }
     }
 
+    // produce function that can only be called once
+    function wrapOnce(fn) {
+        var done = false;
+        return function () {
+            if (!done) {
+                done = true;
+                fn();
+            }
+        }
+    }
+
     // request Simplified Chinese weapon data 
     // and use it to replace the original text
     function getItemData() {
-        getItemData = function(){};
         var matches = location.pathname.match(/\/items\/(\d+)\//i);
         var item = lgg.data.item;
         item.id = matches[1];
@@ -442,19 +448,23 @@
     
     // modified the perks request to get Simplified Chinese data
     function modifyPerksRequest() {
-        modifyPerksRequest = function(){};
-        var realOpen = unsafeWindow.XMLHttpRequest.prototype.open;
-        unsafeWindow.XMLHttpRequest.prototype.open = function() {
-            var url = arguments['1'];
-            if (url.startsWith('/db/items/hover/')
-                && url.includes('-chs?lang=')) {
-                url = url.replace('-chs', ''); // remove added -chs suffix
-                var splits = url.split('=');
-                url = splits[0] + '=zh-chs';
-            }
-            arguments['1'] = url;
-            return realOpen.apply(this, arguments);
-        };
+        function doModifyPerksRequest() {
+            var realOpen = window.XMLHttpRequest.prototype.open;
+            window.XMLHttpRequest.prototype.open = function() {
+                var url = arguments['1'];
+                if (url.startsWith('/db/items/hover/')
+                    && url.includes('-chs?lang=')) {
+                    url = url.replace('-chs', ''); // remove added -chs suffix
+                    var splits = url.split('=');
+                    url = splits[0] + '=zh-chs';
+                }
+                arguments['1'] = url;
+                return realOpen.apply(this, arguments);
+            };
+        }
+        var script = document.createElement("script");
+        script.textContent = "(" + doModifyPerksRequest.toString() + ")();";
+        document.body.appendChild(script);
     }
 
     /* actual translation functions */
