@@ -17,7 +17,7 @@ Add Simplified Chinese weapons and perks display for light.gg.
 1. 进入任意light.gg武器页面，比如[这个](https://www.light.gg/db/items/304659313/ignition-code/)
 2. 按下 `Ctrl + Shift + J` 快捷键打开浏览器的控制台
 3. 在控制台中粘贴以下代码，并回车执行
-```javascript
+```
 (function(){
     var d = document;
     var s = d.createElement('script');
