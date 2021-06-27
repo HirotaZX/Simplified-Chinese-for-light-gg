@@ -39,7 +39,6 @@
                     },
                     itemHeader: { 
                         selector: '#main-column > .item-header', 
-                        pretranslate: getItemDataOnce,
                         ontranslate:  translItemHeader 
                     },
                     itemKeyPerks: { 
@@ -131,6 +130,10 @@
                     }
                 }
                 return null;
+            },
+            getItemId: function() {
+                var matches = location.pathname.match(/\/items\/(\d+)\//i);
+                return matches[1];
             },
             isTranslDone: function() {
                 for (var prop in page.elms) {
@@ -291,7 +294,35 @@
         "MODIFIED": "修改于",
         "ADDED": "添加于",
         "Tags": "标签",
-        "Other Languages": "其他语言"
+        "Other Languages": "其他语言",
+
+        // weapon stats
+        "Swing Speed": "挥舞速度",
+        "Efficiency": "防御效率",
+        "Defense": "防御抗性",
+        "Charge Rate": "充能效率",
+        "Charge Time": "充能时间",
+        "Ammo Capacity": "弹药容量",
+        "Blast Radius": "爆炸范围",
+        "Velocity": "弹头速度",
+        "Impact": "伤害",
+        "Range": "射程",
+        "Accuracy": "精度",
+        "Stability": "稳定性",
+        "Handling": "操控性",
+        "Reload Speed": "填装速度",
+        "Rounds Per Minute": "每分钟发射数",
+        "Magazine": "弹匣",
+        "Draw Time": "蓄力时间",
+        "Aim Assistance": "辅助瞄准",
+        "Inventory Size": "物品栏空间",
+        "Zoom": "变焦",
+        "Recoil": "后坐力",
+        "Bounce Intensity": "回弹强度",
+        "Bounce Direction": "回弹方向",
+        "Tends Vertical": "垂直",
+        "Tends Left": "偏左",
+        "Tends Right": "偏右"
     };
 
     init();
@@ -424,9 +455,8 @@
     // request Simplified Chinese weapon data 
     // and use it to replace the original text
     function getItemData() {
-        var matches = location.pathname.match(/\/items\/(\d+)\//i);
         var item = lgg.data.item;
-        item.id = matches[1];
+        item.id = lgg.utils.getItemId();
         var xhr = new XMLHttpRequest();
         xhr.open('GET', '/db/items/hover/' + item.id + '?lang=zh-chs');
         xhr.send();
@@ -476,15 +506,45 @@
     
     // translate item header
     function translItemHeader(ih) {
-        var item = lgg.data.item;
-        if(!item.ready) {
-            setTimeout(function () {
-                translItemHeader(ih);
-            }, 500);
-            return;
+        var v3d = ih.translated.querySelector('#preview-3d-modal-opener-2 > a');
+        if(v3d) {
+            v3d.childNodes[1].textContent = '查看 3D 模型';
         }
-        ih.translated.querySelector('.item-name h2').childNodes[0].textContent = item.name;
-        ih.translDone = true;
+        var slots = {
+            "1498876634": "动能武器",
+            "2465295065": "能量武器",
+            "953998645": "威能武器"
+        };
+        var classes = ["泰坦", "猎人", "术士", ""];
+        var item = {};
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://www.bungie.net/Platform/Destiny2/Manifest/DestinyInventoryItemDefinition/' + lgg.utils.getItemId() + '/?lc=zh-chs');
+        xhr.setRequestHeader('X-API-Key', 'd4ea1e95b5394ffdb46908af0275f324');
+        xhr.setRequestHeader('content-type', 'application/json');
+        xhr.send();
+        xhr.onload = function() {
+            if (xhr.responseText) {
+                var response = JSON.parse(xhr.responseText).Response;
+                item.name = response.displayProperties.name;
+                item.slot = slots[response.equippingBlock.equipmentSlotTypeHash];
+                item.tier = response.inventory.tierTypeName;
+                item.type = response.itemTypeDisplayName;
+                item.class = classes[response.classType];
+                item.flavor = response.flavorText;
+                item.source = response.displaySource;
+                
+                ih.translated.querySelector('.item-name h2').childNodes[0].textContent = item.name;
+                ih.translated.querySelector('.weapon-type').innerText = 
+                    item.tier + ' / ' + (item.class ? item.class + ' / ' : '') +
+                    item.slot + ' / ' + item.type;
+                var flavors = ih.translated.querySelectorAll('.flavor-text > h4');
+                flavors[0].innerText = item.flavor;
+                if(flavors[1]) {
+                    flavors[1].innerText = item.source;
+                }
+                ih.translDone = true;
+            }
+        };
     }
 
     // translate key perks
@@ -543,8 +603,27 @@
 
     // translate lore content
     function translLoreContent(lc) {
-        lgg.utils.translateTree(lc.translated);
-        lc.translDone = true;
+        var lore = {};
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://www.bungie.net/Platform/Destiny2/Manifest/DestinyLoreDefinition/' + lgg.utils.getItemId() + '/?lc=zh-chs');
+        xhr.setRequestHeader('X-API-Key', 'd4ea1e95b5394ffdb46908af0275f324');
+        xhr.setRequestHeader('content-type', 'application/json');
+        xhr.send();
+        xhr.onload = function() {
+            if (xhr.responseText) {
+                var response = JSON.parse(xhr.responseText).Response;
+                if (response) {
+                    lore.name = response.displayProperties.name;
+                    lore.subtitle = response.subtitle;
+                    lore.description = response.displayProperties.description;
+    
+                    lc.translated.querySelector('h2 > i').nextSibling.textContent = lore.name;
+                    lc.translated.querySelector('p > em').innerText = lore.subtitle;
+                    lc.translated.querySelector('p.lore-desc').innerText = lore.description;
+                }
+                lc.translDone = true;
+            }
+        }
     }
 
     // translate item sidebar
