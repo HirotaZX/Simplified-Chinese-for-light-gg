@@ -23,7 +23,11 @@
         common: {
             navbar: { 
                 selector: '#top-nav', 
-                ontranslate: translNavbar 
+                ontranslate: translStatic 
+            },
+            signup: {
+                selector: '#sign-up-nudge',
+                ontranslate: translStatic
             }
         },
         pages: {
@@ -45,7 +49,7 @@
                     },
                     itemStats: { 
                         selector: '#stat-container',
-                        ontranslate: translItemStats
+                        ontranslate: translStatic
                     },
                     itemPerks: { 
                         selector: '#socket-container > .perks',
@@ -92,9 +96,13 @@
                             if(refresh) {
                                 refresh.childNodes[1].textContent = chs ? '刷新' : 'Refresh';
                             }
-                            
+
                             document.body.dispatchEvent(new Event("doneRefreshing"));
                         }
+                    },
+                    itemYourRollsPlug: {
+                        selector: '#my-rolls-plug',
+                        ontranslate: translStatic
                     },
                     itemRelatedCollectible: { 
                         selector: '#related-collectible', 
@@ -249,6 +257,15 @@
         "Dark Mode": "深色模式",
         "Sign Out": "退出账号",
 
+        // sign up banner
+        "Welcome to light.gg!": "欢迎来到 light.gg！",
+        "Sign in with your Bungie account to track your collection, review your favorite gear, compete on the leaderboards, and more!":
+            "登录 Bungie 账号来跟踪你的收藏、评价你最爱的装备，又或者是在排行榜上一决高下，更多功能等你发现！",
+        "Sign in with your Bungie account to unlock all light.gg features!":
+            "登录 Bungie 账号以解锁 light.gg 所有功能！",
+        "Let's Go": "马上登录",
+        "Not Now": "不是现在",
+
         // item page
         "Weapon Stats": "武器属性",
         "Hidden Stats": "隐藏属性",
@@ -339,7 +356,13 @@
         "Bounce Direction": "回弹方向",
         "Tends Vertical": "垂直",
         "Tends Left": "偏左",
-        "Tends Right": "偏右"
+        "Tends Right": "偏右",
+
+        // sign up plug
+        "Sign in to see the rolls you own for this weapon":
+            "登录以查看该武器你拥有的所有 Roll",
+        "and compare them against community suggested rolls!":
+            "并且获取这些 Roll 的社区常用度评分！"
     };
 
     init();
@@ -515,10 +538,10 @@
     }
 
     /* actual translation functions */
-    // translate navbar
-    function translNavbar(navbar) {
-        lgg.utils.translateTree(navbar.translated);
-        navbar.translDone = true;
+    // translate static UI elements using dict
+    function translStatic(elm) {
+        lgg.utils.translateTree(elm.translated);
+        elm.translDone = true;
     }
     
     // translate item header
@@ -577,12 +600,6 @@
         keyPerks[1].querySelector('h4').innerHTML = item.traitPerk;
         keyPerks[1].querySelector('h4 + div').innerHTML = item.traitPerkDesc;
         kp.translDone = true;
-    }
-
-    // translate item stats
-    function translItemStats(is) {
-        lgg.utils.translateTree(is.translated);
-        is.translDone = true;
     }
 
     // translate item perks
