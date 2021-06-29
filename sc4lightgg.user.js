@@ -22,8 +22,12 @@
         },
         common: {
             navbar: { 
-                selector: '#navbar-collapse', 
-                ontranslate: translNavbar 
+                selector: '#top-nav', 
+                ontranslate: translStatic 
+            },
+            signup: {
+                selector: '#sign-up-nudge',
+                ontranslate: translStatic
             }
         },
         pages: {
@@ -45,21 +49,12 @@
                     },
                     itemStats: { 
                         selector: '#stat-container',
-                        ontranslate: translItemStats
+                        ontranslate: translStatic
                     },
                     itemPerks: { 
                         selector: '#socket-container > .perks',
                         pretranslate: modifyPerksRequestOnce,
                         ontranslate: translItemPerks
-                    },
-                    itemYourRollsTitle: {
-                        selector: '#my-rolls > h4',
-                        ontranslate: function(elm) {
-                            if(elm.translated) {
-                                elm.translated.childNodes[0].textContent = '你的 Roll';
-                            }
-                            elm.translDone = true;
-                        }
                     },
                     itemYourRolls: { 
                         selector: '#my-rolls', 
@@ -85,9 +80,29 @@
                                 };
                             }
                         },
-                        ontoggle: function() {
+                        ontoggle: function(chs) {
+                            var title = document.querySelector('#my-rolls > h4');
+                            if(title) {
+                                title.childNodes[0].textContent = chs ? '你的 Roll' : 'Your Rolls';
+                            }
+                            
+                            var descs = document.querySelectorAll('#my-rolls > div:nth-of-type(1) a');
+                            if(descs) {
+                                descs[0].innerText = chs ? '评分依据' : 'Explain Grades';
+                                descs[1].innerText = chs ? '推荐依据' : 'Explain Recommendations';
+                            }
+
+                            var refresh = document.querySelector('#my-rolls > button:nth-of-type(1)');
+                            if(refresh) {
+                                refresh.childNodes[1].textContent = chs ? '刷新' : 'Refresh';
+                            }
+
                             document.body.dispatchEvent(new Event("doneRefreshing"));
                         }
+                    },
+                    itemYourRollsPlug: {
+                        selector: '#my-rolls-plug',
+                        ontranslate: translStatic
                     },
                     itemRelatedCollectible: { 
                         selector: '#related-collectible', 
@@ -231,11 +246,25 @@
         "Item Comparer": "装备对比",
 
         // navbar
+        "Home": "首页",
+        "Sign In": "登录",
         "Database": "数据库",
         "God Rolls": "God Rolls",
         "Tools": "工具",
         "Collection": "收藏",
         "Leaderboard": "排行榜",
+        "Light Mode": "浅色模式",
+        "Dark Mode": "深色模式",
+        "Sign Out": "退出账号",
+
+        // sign up banner
+        "Welcome to light.gg!": "欢迎来到 light.gg！",
+        "Sign in with your Bungie account to track your collection, review your favorite gear, compete on the leaderboards, and more!":
+            "登录 Bungie 账号来跟踪你的收藏、评价你最爱的装备，又或者是在排行榜上一决高下，更多功能等你发现！",
+        "Sign in with your Bungie account to unlock all light.gg features!":
+            "登录 Bungie 账号以解锁 light.gg 所有功能！",
+        "Let's Go": "马上登录",
+        "Not Now": "不是现在",
 
         // item page
         "Weapon Stats": "武器属性",
@@ -243,6 +272,8 @@
         "Perks": "特性",
         "Curated Roll": "官 Roll",
         "Not all curated rolls actually drop in-game.": "不是所有的官 Roll都能在游戏里掉落。",
+        "Learn more": "了解更多",
+        "Hide Recommendations": "隐藏推荐",
         "Random Rolls": "随机 Roll",
         "Item is eligible for random rolls.": "该道具掉落时可以获得随机特性。",
         "Item has recommended perks from the community.": "该道具具有社区推荐的特性。",
@@ -271,6 +302,7 @@
         "Share": "分享",
         "Compare": "对比",
         "View 3D": "查看 3D",
+        "View in 3D": "查看 3D模型",
         "Screenshots": "屏幕截图",
         "Details": "详情",
         "Deals": "产生 ",
@@ -324,7 +356,13 @@
         "Bounce Direction": "回弹方向",
         "Tends Vertical": "垂直",
         "Tends Left": "偏左",
-        "Tends Right": "偏右"
+        "Tends Right": "偏右",
+
+        // sign up plug
+        "Sign in to see the rolls you own for this weapon":
+            "登录以查看该武器你拥有的所有 Roll",
+        "and compare them against community suggested rolls!":
+            "并且获取这些 Roll 的社区常用度评分！"
     };
 
     init();
@@ -434,7 +472,7 @@
                     }
                 }
                 if(elm.ontoggle) {
-                    elm.ontoggle(elm, chs);
+                    elm.ontoggle(chs);
                 }
             }
         }
@@ -500,18 +538,16 @@
     }
 
     /* actual translation functions */
-    // translate navbar
-    function translNavbar(navbar) {
-        lgg.utils.translateTree(navbar.translated);
-        navbar.translDone = true;
+    // translate static UI elements using dict
+    function translStatic(elm) {
+        lgg.utils.translateTree(elm.translated);
+        elm.translDone = true;
     }
     
     // translate item header
     function translItemHeader(ih) {
-        var v3d = ih.translated.querySelector('#preview-3d-modal-opener-2 > a');
-        if(v3d) {
-            v3d.childNodes[1].textContent = '查看 3D 模型';
-        }
+        lgg.utils.translateTree(ih.translated);
+
         var slots = {
             "1498876634": "动能武器",
             "2465295065": "能量武器",
@@ -564,12 +600,6 @@
         keyPerks[1].querySelector('h4').innerHTML = item.traitPerk;
         keyPerks[1].querySelector('h4 + div').innerHTML = item.traitPerkDesc;
         kp.translDone = true;
-    }
-
-    // translate item stats
-    function translItemStats(is) {
-        lgg.utils.translateTree(is.translated);
-        is.translDone = true;
     }
 
     // translate item perks
