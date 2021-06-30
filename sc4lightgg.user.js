@@ -273,6 +273,7 @@
         "Curated Roll": "官 Roll",
         "Not all curated rolls actually drop in-game.": "不是所有的官 Roll都能在游戏里掉落。",
         "Learn more": "了解更多",
+        "Show Recommendations": "显示推荐",
         "Hide Recommendations": "隐藏推荐",
         "Random Rolls": "随机 Roll",
         "Item is eligible for random rolls.": "该道具掉落时可以获得随机特性。",
@@ -368,6 +369,9 @@
     init();
 
     function init() {
+        // load external script
+        loadMorphdom();
+
         // init language setting
         if (!localStorage.getItem('lang')) {
             localStorage.setItem('lang', 'chs');
@@ -395,6 +399,18 @@
     }
 
     /* function defines */ 
+    // load morphdom and attach it to body
+    function loadMorphdom() {
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://cdn.jsdelivr.net/npm/morphdom@2.6.1/dist/morphdom-umd.min.js');
+        s.addEventListener('load', function() {
+            var s = document.createElement('script');
+            s.text = 'document.body.__morphdom__ = window.morphdom;';
+            document.head.appendChild(s);
+        });
+        document.head.appendChild(s);
+    }
+
     // save and translate DOM elements in memory
     function translateElms() {
         function translateSingleElm(elm) {
@@ -454,13 +470,16 @@
 
     // switch language by replacing html
     function toggleTranslation(chs) {
-        // wait until translation done
-        if(chs && !lgg.utils.isTranslDone()) {
+        // wait until morphdom loaded and translation done
+        if(!document.body.__morphdom__ ||
+            (chs && !lgg.utils.isTranslDone()) ) {
             setTimeout(function() {
                 toggleTranslation(chs);
-            }, 500);
+            }, 200);
             return;
         }
+
+        var morphdom = document.body.__morphdom__;
 
         function toggleSingleElm(elm) {
             var sel = elm.selector;
@@ -468,7 +487,7 @@
                 if(!elm.dynamic) {
                     var domElm = document.querySelector(sel);
                     if(domElm) {
-                        domElm.innerHTML = chs ? elm.translated.innerHTML : elm.original.innerHTML;
+                        morphdom(domElm, chs ? elm.translated : elm.original);
                     }
                 }
                 if(elm.ontoggle) {
@@ -591,7 +610,7 @@
         if(!item.ready) {
             setTimeout(function () {
                 translKeyPerks(kp);
-            }, 500);
+            }, 200);
             return;
         }
         var keyPerks = kp.translated.querySelectorAll('.key-perk');
@@ -624,7 +643,7 @@
         if(!item.ready) {
             setTimeout(function () {
                 translRelatedCollectible(rc);
-            }, 500);
+            }, 200);
             return;
         }
         rc.translated.querySelector('.item-header .item-name h2').childNodes[0].textContent = item.name;
