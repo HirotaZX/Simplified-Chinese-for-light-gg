@@ -395,6 +395,8 @@
 
         translateElms();
         createToggleButton();
+        createSearchButton();
+        createSearchBar();
         toggleTranslation(localStorage.getItem('lang') === 'chs');
     }
 
@@ -466,6 +468,81 @@
 
         toggleButton(localStorage.getItem('lang'));
         document.body.append(btnChs);
+    }
+
+    // create search button
+    function createSearchButton() {
+        var onStatus = true;
+        var btnSearch = document.createElement('button');
+        btnSearch.classList.add('btn', 'btn-orange');
+        btnSearch.style.fontSize = '20px';
+        btnSearch.style.position = 'fixed';
+        btnSearch.style.right = '72px';
+        btnSearch.style.top = '20px';
+        btnSearch.style.zIndex = '5000';
+        btnSearch.style.backgroundColor = 'gray';
+        btnSearch.innerText = '搜';
+
+        function toggleButton() {
+            if(onStatus) {
+                btnSearch.innerText = '搜';
+            } else {
+                btnSearch.innerText = '关';
+            }
+        }
+
+        btnSearch.onclick = function() {
+            var searchBar = document.querySelector('#sc-search-bar');
+            if(onStatus) {
+                searchBar.style.display = 'block';
+                document.querySelector('#sc-search-input').focus();
+            } else {
+                searchBar.style.display = 'none';
+            }
+            onStatus = !onStatus;
+            toggleButton();
+        }
+
+        document.body.append(btnSearch);
+    }
+
+    // create search bar
+    function createSearchBar() {
+        var searchBarHtml = `
+        <div id="sc-search-bar" style="
+            display: none;
+            width: 300px; 
+            position: fixed;
+            top: 20px;
+            right: 124px;
+            z-index: 5000;
+        ">
+            <input id="sc-search-input" type="text" style="
+                height: 40px;
+                width: 100%;
+                max-width: 300px;
+                border: 2px solid gray;
+                font-size: 24px;
+                background-color: #1a1a20;
+                color: #aaa;
+            ">
+            <iframe id="sc-search-result" src="about:blank" style="
+                border: none;
+                height: 500px;
+            "></iframe>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', searchBarHtml);
+        var searchInput = document.querySelector('#sc-search-input');
+        var searchResult = document.querySelector('#sc-search-result');
+        var timeout = null;
+        searchInput.oninput = function() {
+            if(timeout) {
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(function() {
+                searchResult.src = "https://sc4lightgg-worker.haozi.workers.dev/search?q=" + encodeURIComponent(searchInput.value);
+            }, 1000);
+        }
     }
 
     // switch language by replacing html
