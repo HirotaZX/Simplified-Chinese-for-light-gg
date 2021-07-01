@@ -1,0 +1,14 @@
+{
+  "name": "sc4lightgg-worker",
+  "version": "0.1.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "itty-router": "^2.3.10"
+  }
+}
