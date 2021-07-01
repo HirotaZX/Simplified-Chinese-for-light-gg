@@ -1,0 +1,11 @@
+name = "sc4lightgg-worker"
+type = 'webpack'
+account_id = '56d6f768d24bad35300fd56cc8953acc'
+route = ''
+zone_id = ''
+usage_model = ''
+workers_dev = true
+target_type = "webpack"
+kv_namespaces = [
+    { binding = "SC4LIGHTGG_KV", id = "a5a9ba561cb143cab7903d2a318e9853", preview_id = "a5a9ba561cb143cab7903d2a318e9853" }
+]
