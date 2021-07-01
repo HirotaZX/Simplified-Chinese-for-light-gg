@@ -76,15 +76,19 @@ router.get("/search", async ({ query, headers }) => {
                 <base target="_top">
                 <title>“${name}”的搜索结果</title>
                 <style>
+                    html, body {
+                        margin: 0;
+                        padding: 0;
+                    }
                     body {
                         color: #aaa;
                         background-color: #1a1a20;
                     }
                     div.item {
                         display: flex;
-                        width: 100%;
                         height: 64px;
                         border: 1px solid gray;
+                        align-items: center;
                     }
                     div.item img {
                         height: 60px;
@@ -97,11 +101,11 @@ router.get("/search", async ({ query, headers }) => {
                     }
                     div.item a {
                         color: #09f;
-                        font-size: 24px;
+                        font-size: 22px;
                         text-decoration: none;
                     }
                     div.item span {
-                        font-size: 18px;
+                        font-size: 16px;
                     }
                 </style>
             </head>
