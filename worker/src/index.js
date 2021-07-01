@@ -68,18 +68,64 @@ router.get("/search", async ({ query, headers }) => {
             break
         case 'text/html':
         default:
-            let htmlString = '';
+            let htmlString = `
+            <!DOCTYPE html>
+            <html lang="zh-CN">
+            <head>
+                <meta charset="UTF-8">
+                <base target="_top">
+                <title>“${name}”的搜索结果</title>
+                <style>
+                    html, body {
+                        margin: 0;
+                        padding: 0;
+                    }
+                    body {
+                        color: #aaa;
+                        background-color: #1a1a20;
+                    }
+                    div.item {
+                        display: flex;
+                        height: 64px;
+                        border: 1px solid gray;
+                        align-items: center;
+                    }
+                    div.item img {
+                        height: 60px;
+                        border: 2px solid gray;
+                    }
+                    div.item div {
+                        display: flex;
+                        margin-left: 5px;
+                        flex-direction: column;
+                    }
+                    div.item a {
+                        color: #09f;
+                        font-size: 22px;
+                        text-decoration: none;
+                    }
+                    div.item span {
+                        font-size: 16px;
+                    }
+                </style>
+            </head>
+            <body>
+            `
             for(let item of results) {
                 htmlString += `
-                <div style="display: flex;width: 100%;height: 64px;border-style: solid;border-color: gray;border-width: 1px;background-color: #1a1a20;color: #aaa;">
-                    <img src="https://www.bungie.net${item.icon}" alt="${item.name}" style="height: 60px; border-style: solid; border-color: gray; border-width: 2px;"/>
-                    <div style="display: flex;margin-left: 5px;flex-direction: column;">
-                        <a href="https://www.light.gg/db/items/${item.hash}" target="_self" style="color: #09f;font-size: 24px;text-decoration: none;">${item.name}</a>
-                        <span style="font-size: 18px;">${item.type} / ${item.tier}</span>
+                <div class="item">
+                    <img src="https://www.bungie.net${item.icon}" alt="${item.name}"/>
+                    <div>
+                        <a href="https://www.light.gg/db/items/${item.hash}">${item.name}</a>
+                        <span>${item.type} / ${item.tier}</span>
                     </div>  
                 </div>
                 `
             }
+            htmlString += `
+            </body>
+            </html>
+            `
             resp = new Response(htmlString, {
                 status: 200,
                 headers: {
