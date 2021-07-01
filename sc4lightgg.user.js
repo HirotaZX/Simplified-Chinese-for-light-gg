@@ -508,16 +508,23 @@
 
     // create search bar
     function createSearchBar() {
-        var searchBarHtml = `
-        <div id="sc-search-bar" style="
-            display: none;
-            width: 300px; 
-            position: fixed;
-            top: 20px;
-            right: 124px;
-            z-index: 5000;
-        ">
-            <input id="sc-search-input" type="text" style="
+        var searchBarCss = `
+        <style type="text/css">
+            #sc-search-bar {
+                display: none;
+                width: 300px; 
+                position: fixed;
+                top: 70px;
+                right: 20px;
+                z-index: 5000;
+            }
+            @media (min-width: 500px) { 
+                #sc-search-bar {
+                    top: 20px;
+                    right: 124px;
+                }
+            }
+            #sc-search-input {
                 height: 40px;
                 width: 100%;
                 max-width: 300px;
@@ -525,13 +532,22 @@
                 font-size: 24px;
                 background-color: #1a1a20;
                 color: #aaa;
-            ">
-            <iframe id="sc-search-result" src="about:blank" style="
+            }
+            #sc-search-result {
                 border: none;
                 height: 500px;
-            "></iframe>
+            }
+        </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', searchBarCss);
+
+        var searchBarHtml = `
+        <div id="sc-search-bar">
+            <input id="sc-search-input" type="text">
+            <iframe id="sc-search-result" src="about:blank"></iframe>
         </div>`;
         document.body.insertAdjacentHTML('beforeend', searchBarHtml);
+
         var searchInput = document.querySelector('#sc-search-input');
         var searchResult = document.querySelector('#sc-search-result');
         var timeout = null;
