@@ -3,7 +3,7 @@
 // @name:zh             light.gg 简体中文支持
 // @name:zh-CN          light.gg 简体中文支持
 // @namespace           https://github.com/HZDeluxe
-// @version             0.2.3
+// @version             0.3.0
 // @description         Add Simplified Chinese weapons and perks display for light.gg
 // @description:zh      为light.gg添加简体中文武器和特性支持
 // @description:zh-CN   为light.gg添加简体中文武器和特性支持
